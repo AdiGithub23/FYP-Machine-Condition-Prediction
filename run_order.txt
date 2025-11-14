@@ -1,3 +1,7 @@
 1. uv venv fyp_wf_1
 
 2. fyp_wf_1\Scripts\activate
+
+3. uv pip install -r requirements.txt
+
+4. uvicorn main:app --reload

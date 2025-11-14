@@ -1,7 +1,15 @@
-1. uv venv fyp_wf_1
+1. uv venv _fyp_wf_1 --python=python3.12
 
-2. fyp_wf_1\Scripts\activate
+2. _fyp_wf_1\Scripts\activate
 
 3. uv pip install -r requirements.txt
 
-4. uvicorn main:app --reload
+4. uv pip install "pymongo[srv]==3.12"
+
+5. python configs/mongodb_config.py
+
+6. uvicorn main:app --reload
+
+
+
+---

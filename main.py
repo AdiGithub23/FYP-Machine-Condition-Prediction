@@ -12,6 +12,18 @@ streamer = FakeInfluxStreamer(interval_seconds=3, max_points=5)
 stats_service = StatisticsService()
 
 
+@app.get("/sensor/means-history-db")
+def get_means_history_from_db():
+    """
+    Return recent mean values from MongoDB.
+    """
+    data = streamer.get_recent_means_from_db()
+    return {
+        "status": "success",
+        "means_collected": len(data),
+        "data": data
+    }
+
 @app.on_event("startup")
 def start_background_stream():
     """
@@ -68,3 +80,20 @@ def get_means_history():
         "means_collected": len(streamer.get_means_list()),
         "data": streamer.get_means_list()
     }
+
+@app.get("/sensor/last-three-means")
+def get_last_lookback():
+    """
+    Retrieve the last 3 mean values from MongoDB (updated every 15 seconds).
+    """
+    data = streamer.get_last_lookback()
+    return {
+        "status": "success",
+        "means_collected": len(data),
+        "data": data
+    }
+
+
+
+
+

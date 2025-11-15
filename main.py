@@ -8,7 +8,7 @@ import threading
 
 app = FastAPI()
 # fake_influx = FakeInfluxReader()
-streamer = FakeInfluxStreamer(interval_seconds=1, max_points=360)
+streamer = FakeInfluxStreamer(interval_seconds=10, max_points=360)
 stats_service = StatisticsService()
 
 

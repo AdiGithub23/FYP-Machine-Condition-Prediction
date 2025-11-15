@@ -4,6 +4,7 @@ import time
 from collections import deque
 from fake_data.data_generator import generate_fake_point
 from services.statistics_service import StatisticsService
+from services.inference_service import InferenceService
 from configs.mongodb_config import get_database
 
 class FakeInfluxStreamer:
@@ -40,9 +41,14 @@ class FakeInfluxStreamer:
                         self.collection.insert_one(mean_values)
                         print(f"[FakeInflux] Mean inserted into MongoDB. Document: {mean_values}")
                         
-                        # Retrieve last 3 means immediately after insertion
+                        # Retrieve last lookback immediately after insertion
                         self.last_lookback = list(self.collection.find().sort("_id", -1).limit(1200))
-                        print(f"[FakeInflux] Retrieved last 3 means: {len(self.last_lookback)} items")
+                        print(f"[FakeInflux] Retrieved last lookback: {len(self.last_lookback)} items")
+
+                        inference = InferenceService()
+                        forecast, alerts = inference.run_inference(self.last_lookback)
+                        print(f"[FakeInflux] Forecast shape: {forecast.shape if forecast is not None else 'None'}")
+                        print(f"[FakeInflux] Alerts: {alerts}")
                         
                         # Clear buffer for next non-overlapping batch
                         self.buffer.clear()

@@ -8,7 +8,7 @@ import threading
 
 app = FastAPI()
 # fake_influx = FakeInfluxReader()
-streamer = FakeInfluxStreamer(interval_seconds=3, max_points=5)
+streamer = FakeInfluxStreamer(interval_seconds=1, max_points=360)
 stats_service = StatisticsService()
 
 
@@ -59,7 +59,7 @@ def get_hourly_mean():
     mean_values = stats_service.compute_hourly_mean(data)
 
     # if mean_values is None:
-    if mean_values is None or len(data) < 5:
+    if mean_values is None or len(data) < 360:
         return {
             "status": "error",
             "msg": "Not enough data points yet (need at least 1)."
@@ -81,10 +81,10 @@ def get_means_history():
         "data": streamer.get_means_list()
     }
 
-@app.get("/sensor/last-three-means")
+@app.get("/sensor/last-lookback")
 def get_last_lookback():
     """
-    Retrieve the last 3 mean values from MongoDB (updated every 15 seconds).
+    Retrieve the last 1200 mean values from MongoDB (updated every 1 hour).
     """
     data = streamer.get_last_lookback()
     return {

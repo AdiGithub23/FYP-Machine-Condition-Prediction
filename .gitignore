@@ -216,3 +216,5 @@ AI_Model_Artifacts/
 *.csv
 *.ckpt
 *.ipynb_checkpoints/
+
+prompts.txt

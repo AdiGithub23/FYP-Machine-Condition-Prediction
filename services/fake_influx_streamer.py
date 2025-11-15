@@ -20,8 +20,8 @@ class FakeInfluxStreamer:
 
     def start_stream(self):
         """
-        Continuously generate a new data point every 3 seconds.
-        Every 15 seconds (after 5 points), compute mean of last 5 points and add to means_list.
+        Continuously generate a new data point every 10 seconds.
+        Every 360 points (after 360 points), compute mean of last 360 points and add to means_list.
         """
         while True:
             new_point = generate_fake_point()
@@ -31,7 +31,7 @@ class FakeInfluxStreamer:
             print("[FakeInflux] New data point generated:", self.latest_point)
             print(f"[FakeInflux] New data point added. Buffer size: {len(self.buffer)}")
             
-            if self.point_counter >= 5:
+            if self.point_counter >= 360:
                 data = list(self.buffer)
                 mean_values = self.stats_service.compute_hourly_mean(data)
                 if mean_values and self.collection:
@@ -41,7 +41,7 @@ class FakeInfluxStreamer:
                         print(f"[FakeInflux] Mean inserted into MongoDB. Document: {mean_values}")
                         
                         # Retrieve last 3 means immediately after insertion
-                        self.last_lookback = list(self.collection.find().sort("_id", -1).limit(3))
+                        self.last_lookback = list(self.collection.find().sort("_id", -1).limit(1200))
                         print(f"[FakeInflux] Retrieved last 3 means: {len(self.last_lookback)} items")
                         
                         # Clear buffer for next non-overlapping batch
@@ -58,14 +58,14 @@ class FakeInfluxStreamer:
         """Return the rolling window (up to 360 points)."""
         return list(self.buffer)
     
-    def get_recent_means_from_db(self, limit=10):
+    def get_recent_means_from_db(self, limit=360):
         """Optional: Retrieve recent means from MongoDB for API or testing."""
         if self.collection:
             return list(self.collection.find().sort("_id", -1).limit(limit))
         return []
     
     def get_last_lookback(self):
-        """Return the last 3 retrieved means."""
+        """Return the last 1200 retrieved means."""
         return self.last_lookback
 
 

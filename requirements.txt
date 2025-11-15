@@ -9,3 +9,6 @@ torch
 matplotlib
 scikit-learn
 transformers
+pandas
+sendgrid
+

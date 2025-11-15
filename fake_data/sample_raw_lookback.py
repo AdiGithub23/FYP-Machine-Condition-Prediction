@@ -2,6 +2,8 @@
 
 # python -m fake_data.sample_raw_lookback
 
+# This file is for generating 1200 fake hourly mean documents and saving them to MongoDB for testing purposes.
+
 import random
 from configs.mongodb_config import get_database
 

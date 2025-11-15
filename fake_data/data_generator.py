@@ -29,8 +29,8 @@ def generate_fake_timeseries(n_points: int = 360):
     data = []
 
     for i in range(n_points):
-        # timestamp = now - timedelta(seconds=10 * i)
-        timestamp = now - timedelta(seconds=1 * i)
+        timestamp = now - timedelta(seconds=10 * i)
+        # timestamp = now - timedelta(seconds=1 * i)
         entry = generate_fake_point()
         entry["timestamp"] = timestamp.isoformat()
         data.append(entry)

@@ -11,4 +11,4 @@ scikit-learn
 transformers
 pandas
 sendgrid
-
+influxdb-client

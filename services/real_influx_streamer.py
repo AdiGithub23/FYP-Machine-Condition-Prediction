@@ -24,7 +24,7 @@ class RealInfluxStreamer:
         self.stats_service = StatisticsService()
         self.point_counter = 0
         self.db = get_database()
-        self.collection = self.db["hourly_means"] if self.db else None
+        self.collection = self.db[f"hourly_means_{workspace_id}"] if self.db else None
         self.last_lookback = []
 
     def start_stream(self):
@@ -103,7 +103,7 @@ class RealInfluxStreamer:
                         self.collection.insert_one(mean_values)
                         print(f"[RealInflux] Mean inserted into MongoDB: {mean_values}")
 
-                        self.last_lookback = list(self.collection.find().sort("_id", -1).limit(1200))
+                        self.last_lookback = list(self.collection.find({"machine_id": workspace_id}).sort("_id", -1).limit(1200))
                         print(f"[RealInflux] Retrieved lookback: {len(self.last_lookback)} items")
 
                         inference = InferenceService()

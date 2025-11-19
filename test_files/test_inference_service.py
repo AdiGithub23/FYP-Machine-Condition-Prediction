@@ -1,5 +1,5 @@
 # test_inference_service.py
-# Run this script to test inference_service.py: python test_inference_service.py
+# Run this script to test inference_service.py: python test_files/test_inference_service.py
 
 from services.inference_service import InferenceService
 from configs.mongodb_config import get_database

@@ -33,12 +33,12 @@ def start_background_stream():
     """
     thread = threading.Thread(target=streamer.start_stream, daemon=True)
     thread.start()
-    print("Background fake data generator started.")
+    print("Background data streaming process started.")
 
 @app.get("/sensor/latest")
 def get_latest_sensor_point():
     """
-    Return the most recent generated datapoint.
+    Return the most recent datapoint.
     """
     return {
         "status": "success",

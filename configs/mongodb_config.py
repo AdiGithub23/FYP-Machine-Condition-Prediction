@@ -29,7 +29,8 @@ def get_database():
     try:
         client.admin.command('ping')
         print("Pinged your deployment. You successfully connected to MongoDB!")
-        db = client["fyp_hourly_1"]
+        # db = client["fyp_hourly_1"]
+        db = client["maintenancescheduler_db"]
         return db
     except Exception as e:
         print(f"MongoDB connection error: {e}")

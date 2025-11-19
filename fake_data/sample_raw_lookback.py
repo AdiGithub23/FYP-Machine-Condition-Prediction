@@ -5,7 +5,7 @@
 # This file is for generating 1200 fake hourly mean documents and saving them to MongoDB for testing purposes.
 
 import random
-from configs.mongodb_config import get_database
+from configs.mongodb_config import get_database, workspace_id
 
 def generate_fake_hourly_mean():
     """
@@ -16,7 +16,8 @@ def generate_fake_hourly_mean():
         "temp_body_mean": round(random.uniform(25.0, 45.0), 3),
         "current_mean": round(random.uniform(4.0, 7.0), 3),
         "vibration_mean": round(random.uniform(7.5, 9.5), 3),
-        "num_points_used": 360
+        "num_points_used": 360,
+        "machine_id": workspace_id
     }
 
 def generate_fake_lookback(n_docs=1200):
@@ -31,7 +32,7 @@ def save_fake_lookback_to_db(fake_docs):
     """
     db = get_database()
     if db:
-        collection = db["hourly_means"]
+        collection = db[f"hourly_means_{workspace_id}"]
         try:
             result = collection.insert_many(fake_docs)
             print(f"✅ Inserted {len(result.inserted_ids)} fake documents into MongoDB.")

@@ -5,9 +5,11 @@ import pandas as pd
 import torch
 import pickle
 import os
+from bson import ObjectId
+from datetime import datetime
 from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail
-from configs.mongodb_config import get_database
+from configs.mongodb_config import get_database, workspace_id
 
 class InferenceService:
     def __init__(self):
@@ -29,7 +31,7 @@ class InferenceService:
         
         # MongoDB connection
         self.db = get_database()
-        self.collection = self.db["hourly_means"] if self.db else None
+        self.collection = self.db[f"hourly_means_{workspace_id}"] if self.db else None
         self.users_collection = self.db["users"] if self.db else None
         self.workspaces_collection = self.db["workspaces"] if self.db else None
 
@@ -79,16 +81,17 @@ class InferenceService:
             
             print(f"[Inference] Feature {feature_idx}: Anomaly % = {anomaly_percentage:.2f}%")
             
-            if anomaly_percentage >= 30:
+            if anomaly_percentage >= -30:
                 at_risk_features.append(feature_names[feature_idx])
         
         # Determine alert message
+        current_time = datetime.now().isoformat()
         if at_risk_features:
             overall_at_risk = True
-            alert_message = f"Machine at Risk: Stay alert on {', '.join(at_risk_features)}"
+            alert_message = f"Machine at Risk: Stay alert on {', '.join(at_risk_features)} (Checked at: {current_time})"
         else:
             overall_at_risk = False
-            alert_message = "Machine Condition Normal"
+            alert_message = f"Machine Condition Normal (Checked at: {current_time})"
         
         # Step 6: Update MongoDB with alert (from notebook Cell 10)
         if self.collection:
@@ -157,14 +160,21 @@ class InferenceService:
 
     def get_emails_for_workspace(self, workspace_id):
         """
-        Retrieve emails of users associated with the given workspace_id.
+        Retrieve emails of users associated with the given workspace_id (which is the _id of the workspace document).
         """
         if not self.workspaces_collection or not self.users_collection:
             print("[Inference] Database collections not available.")
             return []
-        
+                   
+        # Convert workspace_id to ObjectId and query by _id
+        try:
+            workspace_oid = ObjectId(workspace_id)
+        except Exception as e:
+            print(f"[Inference] Invalid workspace_id format: {workspace_id}")
+            return []
+            
         # Query workspaces collection for the workspace_id
-        workspace_doc = self.workspaces_collection.find_one({"workspace_id": workspace_id})
+        workspace_doc = self.workspaces_collection.find_one({"_id": workspace_oid})
         if not workspace_doc or "members" not in workspace_doc:
             print(f"[Inference] Workspace {workspace_id} not found or has no members.")
             return []
@@ -177,5 +187,7 @@ class InferenceService:
                 user_doc = self.users_collection.find_one({"_id": user_id})  # Assuming _id is the user ID
                 if user_doc and "email" in user_doc:
                     emails.append(user_doc["email"])
-        
+                else:
+                    print(f"[Inference] User {user_id} not found or has no email.")
+            
         return emails

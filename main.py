@@ -3,12 +3,14 @@
 from fastapi import FastAPI
 from services.fake_influx_reader import FakeInfluxReader
 from services.fake_influx_streamer import FakeInfluxStreamer
+from services.real_influx_streamer import RealInfluxStreamer
 from services.statistics_service import StatisticsService
 import threading
 
 app = FastAPI()
 # fake_influx = FakeInfluxReader()
-streamer = FakeInfluxStreamer(interval_seconds=10, max_points=360)
+# streamer = FakeInfluxStreamer(interval_seconds=10, max_points=360)
+streamer = RealInfluxStreamer(interval_seconds=10, max_points=360)
 stats_service = StatisticsService()
 
 

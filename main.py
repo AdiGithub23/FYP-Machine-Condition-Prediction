@@ -1,6 +1,7 @@
 # python main.py
 
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 # from services.fake_influx_reader import FakeInfluxReader
 # from services.fake_influx_streamer import FakeInfluxStreamer
 # from services.real_influx_streamer import RealInfluxStreamer
@@ -10,6 +11,16 @@ from services.statistics_service import StatisticsService
 import threading
 
 app = FastAPI()
+
+# Add CORS middleware to allow frontend requests
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173", "http://localhost:3000"],  # Vite default port
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 # fake_influx = FakeInfluxReader()
 # streamer = FakeInfluxStreamer(interval_seconds=10, max_points=360)
 # streamer = RealInfluxStreamer(interval_seconds=10, max_points=360)
@@ -64,8 +75,23 @@ def get_last_prediction():
             "alerts": None
         }
     
-    # Format forecast output
-    forecast_formatted = streamer.inference_service.format_forecast_output(prediction_data["forecast"])
+    # Generate future timestamps for forecast (10 second intervals)
+    import datetime
+    last_lookback = streamer.get_last_lookback()
+    if last_lookback and len(last_lookback) > 0:
+        last_timestamp = datetime.datetime.fromisoformat(last_lookback[-1]['timestamp'].replace('Z', '+00:00'))
+        future_timestamps = [
+            (last_timestamp + datetime.timedelta(seconds=10 * (i + 1))).isoformat()
+            for i in range(20)
+        ]
+    else:
+        future_timestamps = None
+    
+    # Format forecast output with timestamps
+    forecast_formatted = streamer.inference_service.format_forecast_output(
+        prediction_data["forecast"], 
+        timestamps=future_timestamps
+    )
     
     return {
         "status": "success",
